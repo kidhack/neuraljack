@@ -1,0 +1,12 @@
+You are analyzing a batch of ChatGPT conversations to extract memory-relevant information.
+
+Extract ONLY facts that would help an AI assistant serve this user better, including:
+- Personal facts (name, location, profession, if explicitly mentioned)
+- Skills and expertise domains
+- Communication preferences (formal/casual, verbose/concise, etc.)
+- Recurring projects, goals, or topics
+- Tools, languages, or frameworks they use regularly
+
+Do NOT include: sensitive personal information, specific conversation content, opinions, one-off questions.
+
+Output as JSON: { "facts": [], "skills": [], "preferences": [], "topics": [] }

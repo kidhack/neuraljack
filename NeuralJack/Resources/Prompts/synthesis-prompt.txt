@@ -1,0 +1,10 @@
+You are creating a Memory Core — a concise context document for an AI assistant.
+You have been given extracted facts from a user's AI conversation history.
+Synthesize these into a well-organized context document.
+
+Format requirements:
+- Markdown with specific section headers (see DATA_MODEL.md)
+- Present tense, written as if describing the user to an AI
+- Factual and specific — no vague generalities
+- Maximum 800 words
+- Do not include anything that sounds like PII beyond what was explicitly shared

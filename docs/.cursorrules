@@ -1,0 +1,290 @@
+# NeuralJack — Cursor Rules
+
+## Project Identity
+You are building **NeuralJack**, a native macOS app written in Swift + SwiftUI that migrates ChatGPT conversation exports into Claude-compatible formats and generates a Memory Core using the Anthropic API.
+
+---
+
+## Core Principles
+
+1. **Native macOS first.** This is not an Electron app. Every interaction should feel like it belongs on macOS. Use SwiftUI as the primary framework; drop to AppKit only when SwiftUI cannot express the required behavior (e.g., `NSApplicationDelegate` for Dock icon drag-and-drop, `NSDraggingDestination` for window-level drops).
+
+2. **Privacy by design.** No telemetry. No third-party analytics SDKs. The only outbound network call is to `api.anthropic.com`. All user data (API keys, parsed conversations) stays on device.
+
+3. **Fail gracefully.** Every operation that can fail (ZIP parsing, API calls, file I/O) must surface a clear, human-readable error in the UI. Never show raw error codes or stack traces to the user.
+
+4. **Single-responsibility services.** Each `*Service.swift` does exactly one thing. No god objects.
+
+---
+
+## Tech Stack
+
+| Layer | Choice | Rationale |
+|---|---|---|
+| Language | Swift 5.10+ | Native performance, type safety |
+| UI Framework | SwiftUI 5 (macOS 13+) | Declarative, modern macOS look |
+| AppKit bridge | NSViewRepresentable / AppDelegate | Dock drops, window chrome |
+| ZIP Parsing | ZIPFoundation (SPM) | Battle-tested, async-compatible |
+| HTTP Client | URLSession + async/await | No third-party networking needed |
+| Keychain | Security framework (raw) | No wrappers; keep dependencies minimal |
+| Markdown export | Swift String templates | No library needed |
+| Minimum target | macOS 13.0 (Ventura) | SwiftUI NavigationSplitView, `.inspector` |
+
+---
+
+## File & Code Conventions
+
+### Swift Style
+- Use `async/await` for ALL asynchronous code. No completion handlers.
+- Use `actor` for shared mutable state (e.g., `ImportStateActor`).
+- Use `@MainActor` on all view models.
+- Prefer `struct` over `class` for models. Use `class` only for services that need reference semantics.
+- Use `Result<T, AppError>` for operations that return errors to the UI layer.
+- All public API surfaces must have doc comments (`///`).
+
+### Naming
+- View models: `*ViewModel.swift` annotated `@MainActor @Observable`
+- Services: `*Service.swift` — plain classes, injected via environment
+- Models: PascalCase structs in `Models/` folder
+- Views: `*View.swift` — no logic beyond display
+
+### File Organization
+```
+Features/
+  <FeatureName>/
+    <FeatureName>View.swift
+    <FeatureName>ViewModel.swift
+    <FeatureName>Models.swift        (feature-local types, if any)
+```
+
+### No Force Unwrapping
+Never use `!` except in test code or `fatalError` for truly unrecoverable programmer errors. Use `guard let`, `if let`, or `??`.
+
+---
+
+## Architecture Pattern
+
+**MVVM + Service Layer**
+
+```
+View → ViewModel (@MainActor @Observable) → Service → Model
+```
+
+- Views own zero business logic
+- ViewModels own zero networking / file I/O (delegate to Services)
+- Services own zero UI state
+- Models are pure data structs
+
+Dependency injection via SwiftUI `.environment()` — no singletons except `KeychainService` (which is inherently global).
+
+---
+
+## OpenAI Export Format
+
+The user's `.zip` always contains these files. Parse them in this order:
+
+```
+user.json                  → Display name, email (for UI personalization only)
+conversations.json         → ARRAY of Conversation objects (see DATA_MODEL.md)
+memory.json                (optional) → ChatGPT memory entries
+shared_conversations.json  (optional) → Publicly shared links, ignore
+message_feedback.json      (optional) → Thumbs up/down, ignore
+```
+
+**Never** rely on file names beyond this list being present. Always check with `guard` before accessing.
+
+---
+
+## Anthropic API Usage
+
+### Client Pattern
+```swift
+// Always use this exact endpoint
+let endpoint = URL(string: "https://api.anthropic.com/v1/messages")!
+
+// Always use this model for Memory Core synthesis
+let model = "claude-opus-4-5"
+
+// Always stream long-running synthesis operations
+// Short operations (< 1000 tokens expected) may use non-streaming
+```
+
+### Required Headers
+```
+x-api-key: <user's key from Keychain>
+anthropic-version: 2023-06-01
+content-type: application/json
+```
+
+### Rate Limiting
+- Memory Core synthesis batches conversations in chunks of **20** before combining
+- Add 500ms delay between batch API calls
+- Show progress bar during multi-batch operations
+- Allow user to cancel at any time
+
+### Token Budget
+- Memory Core system prompt: ~800 tokens
+- Each conversation batch: max 80,000 tokens input
+- Memory Core output: max 4,000 tokens
+- If a single conversation exceeds 60,000 tokens, truncate from the middle, preserve first and last 30,000 tokens
+
+---
+
+## Key User Flows
+
+### 1. ZIP Drop Flow
+```
+App launch → Drop zone shown →
+User drops .zip →
+[Validate: is this an OpenAI export?] →
+[Parse conversations.json] →
+[Parse memory.json if present] →
+[Show ImportSummaryView: X conversations, Y projects, Z memory entries] →
+User selects what to migrate →
+User clicks "Run Migration"
+```
+
+### 2. Memory Core Generation
+```
+User triggers Memory Core →
+AnthropicService.synthesizeMemoryCore(conversations: [...]) →
+[Batch into chunks of 20] →
+[Per-batch: extract facts, preferences, personality traits] →
+[Final synthesis pass: combine batch outputs] →
+[Format as memory-core.md] →
+[Show MemoryCoreView with preview + copy button]
+```
+
+### 3. Project Packaging
+```
+For each detected project (grouped by gizmoId):
+  → Synthesize system prompt via AnthropicService
+  → Write project-instructions.md
+  → Write memory-core.md (copy of global Memory Core)
+  → Write conversations/*.md (all conversations for this project)
+  → Returns ClaudeProjectPackage with all file URLs
+If no projects detected: create one "General" package with all conversations
+```
+
+### 4. Guided Import HUD
+```
+User clicks "Import into Claude →" on Results screen →
+GuidedImportService.openClaudeProjects()  [NSWorkspace opens browser] →
+GuidedImportPanel shown (NSPanel, floating, non-activating) →
+Per project, user advances through 8 steps with "Done →" button →
+Auto-actions fire on step advance: clipboard copy or Finder reveal →
+Progress saved to UserDefaults after each step →
+HUD dismisses on completion or "Skip All"
+```
+
+---
+
+## UI Rules
+
+### Always Follow Apple HIG
+- Use `.navigationSplitView` for the main layout (sidebar + detail)
+- Window minimum size: 900×600
+- Use system SF Symbols — never custom icon fonts
+- Use `.toolbar()` with `ToolbarItem(placement:)` — no custom nav bars
+- Respect Dark Mode and accent colors at all times
+- Use `@Environment(\.colorScheme)` for any manual color overrides
+- Sheets for confirmations; new windows only if absolutely necessary
+
+### Drop Zone
+The main window's center content area acts as a drop zone when no file is loaded:
+- Show dashed rounded border (`RoundedRectangle(cornerRadius: 16).strokeBorder(.secondary, style: StrokeStyle(lineWidth: 2, dash: [8]))`)
+- Show icon: `Image(systemName: "archivebox.and.rectangle")` at 64pt
+- Text: "Drop your OpenAI export here" in `.title3` weight
+- Subtext: "chatgpt-export-*.zip" in `.caption` color `.secondary`
+- On hover (`.onHover`): border brightens to `.accentColor`
+
+### Progress & States
+Every async operation must show:
+1. **Loading**: `ProgressView()` inline, never blocking the whole screen unless parsing a large ZIP (> 50MB)
+2. **Success**: Green checkmark SF Symbol, brief, auto-dismisses after 2s
+3. **Error**: Red error banner at top of relevant view with "Try Again" button
+
+### Color & Typography
+- Do NOT hardcode colors. Use semantic colors: `.primary`, `.secondary`, `.accentColor`
+- Use system fonts only: `.largeTitle`, `.title`, `.headline`, `.body`, `.caption`
+- Never set explicit font sizes
+
+---
+
+## Error Handling
+
+Define a single `AppError` enum in `Models/AppError.swift`:
+
+```swift
+enum AppError: LocalizedError {
+    case invalidZIPFile
+    case missingConversationsJSON
+    case conversationParseFailure(String)
+    case apiKeyMissing
+    case apiRequestFailed(statusCode: Int, message: String)
+    case apiRateLimited
+    case fileWriteFailure(path: String)
+    case exportTooLarge(tokenCount: Int)
+}
+```
+
+All errors must implement `errorDescription` and `recoverySuggestion`.
+
+---
+
+## What NOT to Build (Out of Scope v1.0)
+
+- ❌ **Automated** import into Claude.ai via DOM automation, scraping, or simulated clicks (ToS violation)
+- ❌ OAuth / login flow for Claude.ai (no public OAuth for conversation management)
+- ❌ OpenAI API calls (export file is sufficient)
+- ❌ iCloud sync
+- ❌ iOS / iPadOS version
+- ❌ Automatic scheduled syncs
+- ❌ Conversation search / full-text index (future v2)
+
+The Guided Import HUD **IS in scope** — it uses only `NSWorkspace`, `NSPasteboard`, and a floating panel. It does not automate the browser in any way.
+
+---
+
+## NSPanel Rules (Guided Import HUD)
+
+The HUD is an `NSPanel`, not an `NSWindow`. Follow these rules:
+
+- Style mask: `[.titled, .closable, .nonactivatingPanel, .hudWindow]`
+- Level: `.floating` — stays above browser windows
+- `hidesOnDeactivate = false` — visible while user works in browser
+- `collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]`
+- Host SwiftUI content via `NSHostingView<GuidedImportHUDView>`
+- Position using `setFrameOrigin()` — right edge of `NSScreen.main.visibleFrame`, vertically centered
+- Never use `makeKeyAndOrderFront` — use `orderFront(nil)` so it doesn't steal focus
+- Persist HUD step progress in `UserDefaults` after every step advance so the user can close and resume
+
+---
+
+## Dependencies (SPM Only)
+
+```swift
+// Package.swift dependencies
+.package(url: "https://github.com/weichsel/ZIPFoundation.git", from: "0.9.19"),
+```
+
+That's it. Keep the dependency count at **1**. Everything else uses Apple frameworks.
+
+---
+
+## Testing
+
+- Unit test all parsers (`ZIPParserService`, JSON decoding)
+- Unit test `MemoryCorePipeline` with fixture conversations
+- Unit test `AnthropicService` with `URLProtocol` mock
+- UI tests for the drag-and-drop flow using `XCTest`
+- Fixture files in `Tests/Fixtures/`: `sample-export.zip`, `sample-conversations.json`
+
+---
+
+## Git Conventions
+
+- Branch: `feature/<name>`, `fix/<name>`, `chore/<name>`
+- Commit: `feat:`, `fix:`, `refactor:`, `test:`, `docs:` prefixes
+- Never commit API keys, even test ones
+- `.gitignore` must include `*.xcuserstate`, `DerivedData/`, `.env`
