@@ -33,10 +33,10 @@
 ## Quick start
 
 1. **Export your ChatGPT data**  
-   ChatGPT → Settings → [Data Controls](https://chatgpt.com/#settings/DataControls) → **Export data** → download the ZIP.
+   - ChatGPT → Settings → [Data Controls](https://chatgpt.com/#settings/DataControls) → **Export data** → download the ZIP.
 
 2. **Open NeuralJack**  
-   Import the data ZIP or extracted folder.
+    - Import the data ZIP or extracted folder.
 
 3. **Customize Your Migration Path**
    - **Parse Your Data** — Pick an output folder.
@@ -45,8 +45,8 @@
    - **Export** — Projects, conversations, and prompts are written to your output folder.
 
 4. **Use the output**
-   - **claude-cowork-import-prompt.md** / **claude-import-manual-prompt.md** — For bringing projects and conversations into Claude.
-   - **memory-core.md** or **memory-core-cowork-prompt.md** — For Claude memory import (Settings → Capabilities).
+   - Conversations sorted by project to import to Claude.
+   - Prompt files to guide you and Claude to migrate data.
 
 
 ---
