@@ -53,7 +53,7 @@
 
 ## Installation
 
-Get `NeuralJack.dmg` from the [latest release](https://github.com/kidhack/neuraljack/releases/latest). Open the DMG and drag NeuralJack.app to Applications.
+Download the latest release of [NeuralJack.dmg](https://github.com/kidhack/neuraljack/releases/download/v1.0/NeuralJack-1.0.dmg). Open the DMG and drag NeuralJack.app to Applications.
 
 ## Version history
 
