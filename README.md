@@ -26,7 +26,7 @@
 - **Parses ChatGPT exports** — Uses your official export ZIP (Settings → Data Controls → Export). No scraping or third-party APIs.
 - **Builds a Memory Core** — A structured context document to paste into Claude (Settings → Capabilities → Import memory). Generate via API key in-app, or get a Cowork prompt file.
 - **Exports by project** — Markdown per conversation, grouped by ChatGPT project, ready for Claude.
-- **Guides you in** — Step-by-step prompts for Cowork or manual import.
+- **Creates prompted guides** — Step-by-step prompts for Cowork or manual import.
 
 ---
 
@@ -36,17 +36,18 @@
    ChatGPT → Settings → Data Controls → **Export data** → download the ZIP.
 
 2. **Open NeuralJack**  
-   Drag the ZIP onto the app (or onto the window) and follow the wizard.
+   Import the data ZIP or folder.
 
-3. **Choose your path**
-   - **Your Data** — Pick an output folder and whether you want a Memory Core and export log.
-   - **Memory Core Setup** — Use an API key to generate the Memory Core in the app, or get a **memory-core-cowork-prompt.md** to run in Claude Cowork.
+3. **Customize Your Migration Path**
+   - **Parse Your Data** — Pick an output folder.
    - **Select Projects** — Choose which projects to export; the Memory Core (or prompt) uses only these.
-   - **Export** — Projects and (optionally) uncategorized conversations are written to your output folder.
+   - **Memory Core** — Optionally use Claude API to generate a Memory Core, exporty a prompt to run in Claude Cowork.
+   - **Export** — Projects, conversations, and prompts are written to your output folder.
 
 4. **Use the output**
-   - **memory-core.md** or **memory-core-cowork-prompt.md** — For Claude memory import (Settings → Capabilities).
    - **claude-cowork-import-prompt.md** / **claude-import-manual-prompt.md** — For bringing projects and conversations into Claude.
+   - **memory-core.md** or **memory-core-cowork-prompt.md** — For Claude memory import (Settings → Capabilities).
+
 
 ---
 
@@ -64,11 +65,11 @@ Get `NeuralJack.dmg` from the [latest release](https://github.com/kidhack/neural
 ## Requirements
 
 - **macOS 15+** (Sequoia or later)
-- **Anthropic API key** — Optional for Memory Core *generation*; if you skip it, you get the Cowork prompt file instead. Required for in-app synthesis (stored in Keychain).
+- **Anthropic API key** — Optional for Memory Core generation.
 
 ---
 
-## Output layout
+## Output architecture
 
 ```
 Your chosen folder/
@@ -96,30 +97,6 @@ open NeuralJack.xcodeproj
 ```
 
 Build and run in Xcode (⌘R). No extra dependencies beyond the Swift packages in the project.
-
----
-
-## Releasing
-
-To create a distributable DMG for a new version:
-
-```bash
-./scripts/package-release.sh 1.0
-```
-
-This builds the app (Release config) and creates `dist/NeuralJack-1.0.dmg`. For the classic drag-to-install layout (app icon, arrow, Applications folder), install [create-dmg](https://github.com/create-dmg/create-dmg) first:
-
-```bash
-brew install create-dmg
-```
-
-Then:
-
-1. Create a [GitHub Release](https://github.com/kidhack/neuraljack/releases/new) with tag `v1.0` (or matching version)
-2. Upload the DMG as a release asset
-3. Add release notes
-
-Requires full Xcode (not just Command Line Tools). For signed/notarized distribution, use Xcode’s Archive → Distribute App flow or add signing steps to the script.
 
 ---
 
