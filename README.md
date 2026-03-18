@@ -50,6 +50,17 @@
 
 ---
 
+## Installation
+
+Get `NeuralJack.dmg` from the [latest release](https://github.com/kidhack/neuraljack/releases/latest). Open the DMG and drag NeuralJack.app to Applications.
+
+## Version history
+
+- **[Download latest build](https://github.com/kidhack/neuraljack/releases/latest)** — Newest version with pre-built DMG
+- **[All releases](https://github.com/kidhack/neuraljack/releases)** — Full version history and older builds
+
+---
+
 ## Requirements
 
 - **macOS 15+** (Sequoia or later)
@@ -73,17 +84,6 @@ Your chosen folder/
         │   └── … conversation .md files
         └── …
 ```
-
----
-
-## Installation
-
-Get `NeuralJack.dmg` from the [latest release](https://github.com/kidhack/neuraljack/releases/latest). Open the DMG and drag NeuralJack.app to Applications.
-
-## Version history
-
-- **[Download latest build](https://github.com/kidhack/neuraljack/releases/latest)** — Newest version with pre-built DMG
-- **[All releases](https://github.com/kidhack/neuraljack/releases)** — Full version history and older builds
 
 ---
 
