@@ -41,7 +41,7 @@
 3. **Customize Your Migration Path**
    - **Parse Your Data** — Pick an output folder.
    - **Select Projects** — Choose which projects to export; the Memory Core (or prompt) uses only these.
-   - **Memory Core** — Optionally use Claude API to generate a Memory Core, exporty a prompt to run in Claude Cowork.
+   - **Memory Core** — Optionally use Claude API to generate a Memory Core or export a prompt to run in Claude Cowork.
    - **Export** — Projects, conversations, and prompts are written to your output folder.
 
 4. **Use the output**
