@@ -23,20 +23,20 @@
 
 ## What it does
 
-- **Parses ChatGPT exports** — Uses your official export ZIP (Settings → Data Controls → Export). No scraping or third-party APIs.
-- **Builds a Memory Core** — A structured context document to paste into Claude (Settings → Capabilities → Import memory). Generate via API key in-app, or get a Cowork prompt file.
+- **Parses ChatGPT data** — Cleans OpenAI data export for migration to Claude.
+- **Builds a Memory Core** — Context document to paste into Claude.
 - **Exports by project** — Markdown per conversation, grouped by ChatGPT project, ready for Claude.
-- **Creates prompted guides** — Step-by-step prompts for Cowork or manual import.
+- **Creates prompted guides** — Step-by-step migration prompts for Cowork or manual import.
 
 ---
 
 ## Quick start
 
 1. **Export your ChatGPT data**  
-   ChatGPT → Settings → Data Controls → **Export data** → download the ZIP.
+   ChatGPT → Settings → [Data Controls](https://chatgpt.com/#settings/DataControls) → **Export data** → download the ZIP.
 
 2. **Open NeuralJack**  
-   Import the data ZIP or folder.
+   Import the data ZIP or extracted folder.
 
 3. **Customize Your Migration Path**
    - **Parse Your Data** — Pick an output folder.
