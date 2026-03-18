@@ -8,6 +8,7 @@ import AppKit
 
 struct WizardDataSummaryStepView: View {
     @Bindable var vm: WizardViewModel
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         WizardStepShell(
@@ -31,7 +32,7 @@ struct WizardDataSummaryStepView: View {
             if let user = vm.export.user, user.email != nil || user.id != nil {
                 WizardCardRow(divider: true) {
                     Text("OpenAI Account")
-                        .font(.neuralJackTitle2Semibold)
+                        .font(.neuralJackCardHeaderSemibold)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 WizardCardRow(divider: true) {
@@ -44,7 +45,7 @@ struct WizardDataSummaryStepView: View {
                         if let range = vm.export.dateRange {
                             Text(rangeFormatted(range))
                                 .font(.neuralJackCaption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyleNeuralJackSecondary()
                         }
                     }
                     .frame(maxWidth: .infinity)
@@ -54,20 +55,19 @@ struct WizardDataSummaryStepView: View {
                 HStack(spacing: 16) {
                     VStack(spacing: 6) {
                         Text("\(vm.export.conversationCount)")
-                            .font(.neuralJackTitle2Semibold)
+                            .font(.neuralJackCardHeaderSemibold)
                         Text("Conversations")
                             .font(.neuralJackCaption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyleNeuralJackSecondary()
                     }
                     .frame(maxWidth: .infinity)
-                    Divider()
-                        .frame(width: 1)
+                    NeuralJackDivider(axis: .vertical)
                     VStack(spacing: 6) {
                         Text("\(vm.export.projectCount)")
-                            .font(.neuralJackTitle2Semibold)
+                            .font(.neuralJackCardHeaderSemibold)
                         Text("Projects")
                             .font(.neuralJackCaption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyleNeuralJackSecondary()
                     }
                     .frame(maxWidth: .infinity)
                 }
@@ -82,11 +82,11 @@ struct WizardDataSummaryStepView: View {
             WizardCardRow(divider: true) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Include With Migration")
-                        .font(.neuralJackTitle2Semibold)
+                        .font(.neuralJackCardHeaderSemibold)
                     Text("Optional data to include with projects and conversations.")
                         .font(.neuralJackCaption)
                         .lineSpacing(NeuralJack.bodyLineSpacing)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyleNeuralJackSecondary()
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -95,10 +95,10 @@ struct WizardDataSummaryStepView: View {
                 HStack(alignment: .top, spacing: 10) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Memory Core")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.system(size: 14, weight: .medium))
                         Text("Generate context file for Cluade based on exported projects.")
                             .font(.neuralJackCaption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyleNeuralJackSecondary()
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     Toggle(isOn: $vm.includeMemoryCore) { EmptyView() }
@@ -112,10 +112,10 @@ struct WizardDataSummaryStepView: View {
                 WizardCardRow(divider: true) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("\(vm.uncategorizedConversations.count) general conversations")
-                            .font(.system(size: 18, weight: .medium))
+                            .font(.system(size: 14, weight: .medium))
                         Text("Conversations not tied to a specific project.")
                             .font(.neuralJackCaption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyleNeuralJackSecondary()
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -125,10 +125,10 @@ struct WizardDataSummaryStepView: View {
                 HStack(alignment: .top, spacing: 10) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Output Log")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.system(size: 14, weight: .medium))
                         Text("Include a log of all outputs.")
                             .font(.neuralJackCaption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyleNeuralJackSecondary()
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     Toggle(isOn: $vm.includeExportLog) { EmptyView() }
@@ -147,7 +147,7 @@ struct WizardDataSummaryStepView: View {
         WizardCard {
             WizardCardRow {
                 Text("Output Location")
-                    .font(.neuralJackTitle2Semibold)
+                    .font(.neuralJackCardHeaderSemibold)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
@@ -157,22 +157,22 @@ struct WizardDataSummaryStepView: View {
                 } label: {
                     HStack(spacing: 8) {
                         Image(systemName: vm.hasUserChosenOutputDirectory ? "folder.fill" : "folder.badge.plus")
-                            .foregroundStyle(vm.hasUserChosenOutputDirectory ? Color.secondary : Color.accentColor)
+                            .foregroundStyle(vm.hasUserChosenOutputDirectory ? Color.neuralJackSecondary : (colorScheme == .dark ? Color.neuralJackLinkOnDark : Color.accentColor))
                         if vm.hasUserChosenOutputDirectory {
                             Text(vm.outputFolderPath())
-                                .font(.neuralJackCaption)
-                                .foregroundStyle(.secondary)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundStyle(colorScheme == .dark ? Color.neuralJackLinkOnDark : Color.neuralJackSecondaryLight)
                                 .lineLimit(1)
                                 .truncationMode(.middle)
                         } else {
                             Text("Choose where to save your export…")
-                                .font(.neuralJackCaption)
-                                .foregroundStyle(Color.accentColor)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundStyle(colorScheme == .dark ? Color.neuralJackLinkOnDark : Color.accentColor)
                         }
                         Spacer()
                         Image(systemName: "ellipsis.circle")
                             .font(.neuralJackCaption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyleNeuralJackSecondary()
                     }
                 }
                 .buttonStyle(.plain)

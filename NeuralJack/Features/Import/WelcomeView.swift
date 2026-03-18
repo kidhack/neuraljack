@@ -9,22 +9,30 @@ import UniformTypeIdentifiers
 
 struct WelcomeView: View {
     @Environment(ImportViewModel.self) private var importViewModel
+    @Environment(\.colorScheme) private var colorScheme
     @Binding var isTargeted: Bool
     @State private var shakeTrigger = 0
 
     var body: some View {
-        VStack(spacing: 36) {
+        VStack(alignment: .leading, spacing: 0) {
             Text("ChatGPT → Claude")
                 .font(.system(size: 36, weight: .medium))
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text("NeuralJack is a migration assistant that prepares ChatGPT data so it can easily be imported into Claude. It can break conversations into project folders, create a memory core based off conversations, and generate Claude prompts to help with the migration process.")
+            Spacer().frame(height: 16)
+
+            Text("NeuralJack is a migration assistant that prepares ChatGPT data for easy import to Claude. It will parse conversations into project folders, create a Memory Core using selected projects, and generate Claude prompts to complete migration.")
                 .font(.neuralJackBody)
                 .lineSpacing(4)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+                .foregroundStyleNeuralJackSecondary()
+                .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
 
+            Spacer().frame(height: 28)
+
             getStartedCallout
+
+            Spacer().frame(height: 36)
 
             DropZoneView(isTargeted: $isTargeted, onChooseFile: { openFilePanel() })
                 .modifier(ShakeEffect(trigger: shakeTrigger))
@@ -45,10 +53,10 @@ struct WelcomeView: View {
         HStack(alignment: .center, spacing: 16) {
             VStack(alignment: .leading, spacing: 6) {
                 Text("Get Started")
-                    .font(.neuralJackTitle2Semibold)
+                    .font(.neuralJackCardHeaderSemibold)
                 Text("Export your ChatGPT data from OpenAI")
                     .font(.system(size: 14))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyleNeuralJackSecondary()
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -65,10 +73,16 @@ struct WelcomeView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(.quaternary.opacity(0.5))
-        )
+        .background(cardBackground)
+    }
+
+    @ViewBuilder
+    private var cardBackground: some View {
+        if colorScheme == .light {
+            RoundedRectangle(cornerRadius: 10).fill(Color.neuralJackCardBackgroundLight)
+        } else {
+            RoundedRectangle(cornerRadius: 10).fill(Color.neuralJackCardBackgroundDark)
+        }
     }
 
     private func openFilePanel() {

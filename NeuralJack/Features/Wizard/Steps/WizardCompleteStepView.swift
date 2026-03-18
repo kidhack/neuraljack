@@ -8,6 +8,7 @@ import SwiftUI
 
 struct WizardCompleteStepView: View {
     @Bindable var vm: WizardViewModel
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         WizardStepShell(
@@ -51,7 +52,7 @@ struct WizardCompleteStepView: View {
         WizardCard {
             WizardCardRow {
                 Text("Ready For Migration")
-                    .font(.neuralJackTitle2Semibold)
+                    .font(.neuralJackCardHeaderSemibold)
             }
 
             SummaryRowView(
@@ -85,26 +86,29 @@ struct WizardCompleteStepView: View {
             WizardCardRow(divider: false) {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Migrate Data")
-                        .font(.neuralJackTitle2Semibold)
+                        .font(.neuralJackCardHeaderSemibold)
                     Text("Finish your migration to Claude using one of the two workflows.")
                         .font(.neuralJackCaption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyleNeuralJackSecondary()
                         .lineSpacing(4)
-                    Divider()
+                    NeuralJackDivider()
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Automated migration with Claude Cowork")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.system(size: 14, weight: .medium))
                         exportFileRow(name: "claude-cowork-import-prompt.md", purpose: "Read instructions and paste prompt into Claude Cowork; it will grab project names from chatgpt.com via browser and imports to Claude.", openURL: vm.exportFolderFileURL(filename: "claude-cowork-import-prompt.md")) {
                             Button("Open Claude Cowork") {
                                 launchClaudeCowork()
                             }
                             .buttonStyle(.bordered)
                             .controlSize(.small)
+                            .font(.system(size: 12, weight: .semibold))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
                             .focusable(false)
                         }
-                        Divider()
+                        NeuralJackDivider()
                         Text("Guided migration with Claude Chat")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.system(size: 14, weight: .medium))
                         exportFileRow(name: "claude-import-manual-prompt.md", purpose: "Read instructions and paste prompt into Claude; you will provide project names while Claude guides you step by step to migrate data.", openURL: vm.exportFolderFileURL(filename: "claude-import-manual-prompt.md"))
                     }
                     .font(.neuralJackCaption)
@@ -124,25 +128,26 @@ struct WizardCompleteStepView: View {
                             Text(name)
                                 .font(.system(size: 12, design: .monospaced))
                                 .fontWeight(.semibold)
-                                .foregroundStyle(Color.accentColor)
+                                .foregroundStyle(colorScheme == .dark ? Color.neuralJackLinkOnDark : Color.accentColor)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background(RoundedRectangle(cornerRadius: 6).fill(.quaternary))
+                                .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(.quaternary, lineWidth: 1))
                         }
                         .buttonStyle(.plain)
                     } else {
                         Text(name)
                             .font(.system(size: 12, design: .monospaced))
                             .fontWeight(.semibold)
+                            .foregroundStyleNeuralJackSecondary()
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(RoundedRectangle(cornerRadius: 6).fill(.quaternary))
+                            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(.quaternary, lineWidth: 1))
                     }
                     trailing()
                 }
                 if !purpose.isEmpty {
                     Text(purpose)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyleNeuralJackSecondary()
                         .lineSpacing(2)
                 }
             }
@@ -177,7 +182,7 @@ struct WizardCompleteStepView: View {
             WizardCardRow(divider: false) {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Memory Core")
-                        .font(.neuralJackTitle2Semibold)
+                        .font(.neuralJackCardHeaderSemibold)
                     exportFileRow(
                         name: "memory-core.md",
                         purpose: "",
@@ -196,7 +201,7 @@ struct WizardCompleteStepView: View {
                     if let core = vm.memoryCore {
                         Text("Context from \(core.sourceConversationCount) conversations. Go to Claude → Settings → Capabilities → \"Import memory from other AI providers\". Click \"Start Import\" and paste Memory Core.")
                             .font(.neuralJackCaption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyleNeuralJackSecondary()
                             .lineSpacing(4)
                     }
                 }
@@ -211,10 +216,10 @@ struct WizardCompleteStepView: View {
             WizardCardRow(divider: false) {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Memory Core")
-                        .font(.neuralJackTitle2Semibold)
+                        .font(.neuralJackCardHeaderSemibold)
                     Text("Generate a Memory Core from your exported conversations using Claude Cowork.")
                         .font(.neuralJackCaption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyleNeuralJackSecondary()
                         .lineSpacing(4)
                     exportFileRow(
                         name: "memory-core-cowork-prompt.md",
@@ -234,7 +239,7 @@ struct WizardCompleteStepView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(alignment: .center, spacing: 8) {
                         Text("Export Log")
-                            .font(.neuralJackTitle2Semibold)
+                            .font(.neuralJackCardHeaderSemibold)
                         Spacer(minLength: 8)
                         exportLogCardTrailing
                     }
@@ -280,7 +285,7 @@ struct WizardCompleteStepView: View {
                 ProgressView().controlSize(.small)
                 Text("Saving…")
                     .font(.neuralJackCaption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyleNeuralJackSecondary()
             }
         }
     }
@@ -292,7 +297,7 @@ struct WizardCompleteStepView: View {
             WizardCardRow(divider: false) {
                 HStack {
                     Text("Support NeuralJack")
-                        .font(.neuralJackTitle2Semibold)
+                        .font(.neuralJackCardHeaderSemibold)
                     Spacer()
                     Button {
                         NSWorkspace.shared.open(URL(string: "https://github.com/sponsors/kidhack")!)
@@ -315,26 +320,31 @@ struct WizardCompleteStepView: View {
 // MARK: - Summary Row
 
 struct SummaryRowView: View {
+    @Environment(\.colorScheme) private var colorScheme
     let icon: String
     let label: String
     let value: String
     let success: Bool
     var divider: Bool = true
 
+    private var valueColor: Color {
+        success ? .green : (colorScheme == .dark ? Color.neuralJackSecondaryDark : Color.neuralJackSecondaryLight)
+    }
+
     var body: some View {
         WizardCardRow(divider: divider) {
             HStack(spacing: 10) {
                 Image(systemName: icon)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyleNeuralJackSecondary()
                     .frame(width: 18)
                 Text(label)
                     .font(.neuralJackBody)
                 Spacer()
                 Text(value)
                     .font(.neuralJackCaption)
-                    .foregroundStyle(success ? .green : .secondary)
+                    .foregroundStyle(valueColor)
                 Image(systemName: success ? "checkmark.circle.fill" : "minus.circle")
-                    .foregroundStyle(success ? .green : .secondary)
+                    .foregroundStyle(valueColor)
             }
         }
     }

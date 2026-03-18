@@ -24,7 +24,7 @@ struct WizardProjectSelectionView: View {
                 } else if vm.selectedProjectsCount == 0 && !vm.allSelectedProjectsDone {
                     Text("Select at least one project to continue.")
                         .font(.neuralJackCaption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyleNeuralJackSecondary()
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -37,24 +37,18 @@ struct WizardProjectSelectionView: View {
     // MARK: - Select All
 
     private var selectAllRow: some View {
-        HStack(alignment: .center, spacing: 0) {
-            HStack(alignment: .center, spacing: 6) {
-                TriStateCheckbox(
-                    isOn: vm.allProjectsSelected,
-                    isIndeterminate: vm.someProjectsSelected,
-                    action: { vm.setAllProjectsSelected(!vm.allProjectsSelected) }
-                )
-                .frame(width: 22, height: 22)
-                Text("Projects")
-                    .font(.neuralJackTitle2Semibold)
-            }
-            .padding(.leading, 8)
-            Spacer(minLength: 8)
-            Text("\(vm.selectedProjectsCount) project\(vm.selectedProjectsCount == 1 ? "" : "s") selected")
-                .font(.neuralJackCaption)
-                .foregroundStyle(.secondary)
+        HStack(alignment: .center, spacing: 6) {
+            TriStateCheckbox(
+                isOn: vm.allProjectsSelected,
+                isIndeterminate: vm.someProjectsSelected,
+                action: { vm.setAllProjectsSelected(!vm.allProjectsSelected) }
+            )
+            .frame(width: 22, height: 22)
+            Text("Projects")
+                .font(.neuralJackCardHeaderSemibold)
         }
-        .frame(minWidth: 0, maxWidth: .infinity)
+        .padding(.leading, 16)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     // MARK: - Project List
@@ -153,6 +147,7 @@ private struct ProjectRowView: View {
     let phase: WizardViewModel.ProjectPhase
     let onToggleSelection: () -> Void
 
+    @Environment(\.colorScheme) private var colorScheme
     @State private var isExpanded = false
 
     var body: some View {
@@ -169,10 +164,10 @@ private struct ProjectRowView: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(group.name)
-                        .font(.system(size: 18, weight: .medium))
+                        .font(.system(size: 14, weight: .medium))
                     Text("\(group.conversations.count) conversation\(group.conversations.count == 1 ? "" : "s")")
                         .font(.neuralJackCaption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyleNeuralJackSecondary()
                 }
 
                 Spacer(minLength: 8)
@@ -184,18 +179,19 @@ private struct ProjectRowView: View {
                 } label: {
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyleNeuralJackSecondary()
                 }
                 .buttonStyle(.plain)
             }
-            .padding(8)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
 
             if isExpanded {
                 VStack(alignment: .leading, spacing: 6) {
                     ForEach(group.conversations) { conv in
                         Text(conv.title)
                             .font(.neuralJackCaption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyleNeuralJackSecondary()
                             .lineLimit(1)
                             .truncationMode(.tail)
                     }
@@ -206,6 +202,10 @@ private struct ProjectRowView: View {
                 .padding(.vertical, 6)
             }
         }
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(isSelected ? (colorScheme == .dark ? Color.black.opacity(0.5) : Color.white.opacity(0.5)) : Color.clear)
+        )
         .contentShape(Rectangle())
         .onTapGesture { isExpanded.toggle() }
     }

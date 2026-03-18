@@ -19,6 +19,7 @@ struct PreferencesView: View {
 
 private struct PreferencesFormView: View {
     @Bindable var viewModel: PreferencesViewModel
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         Form {
@@ -28,13 +29,13 @@ private struct PreferencesFormView: View {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundStyle(.green)
                         Text(viewModel.savedKeyMasked)
-                            .font(.system(size: 18, design: .monospaced))
+                            .font(.system(size: 16, design: .monospaced))
                         Spacer()
                         Button {
                             viewModel.removeKey()
                         } label: {
                             Image(systemName: "minus.circle.fill")
-                                .font(.neuralJackTitle2)
+                                .font(.neuralJackCardHeader)
                                 .foregroundStyle(.red)
                         }
                         .buttonStyle(.plain)
@@ -72,7 +73,7 @@ private struct PreferencesFormView: View {
                     case .validating:
                         Text("Validating…")
                             .font(.neuralJackCaption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyleNeuralJackSecondary()
                     case .invalid(let msg):
                         Text(msg)
                             .font(.neuralJackCaption)
@@ -84,12 +85,14 @@ private struct PreferencesFormView: View {
 
                 Text("Your key is stored securely in the macOS Keychain and never leaves your Mac except when calling api.anthropic.com.")
                     .font(.neuralJackCaption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyleNeuralJackSecondary()
 
                 Link("Get a key at console.anthropic.com →", destination: URL(string: "https://console.anthropic.com")!)
             }
         }
         .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
+        .background(colorScheme == .dark ? Color.neuralJackWindowBackgroundDark : Color(NSColor.windowBackgroundColor))
         .frame(width: 420, height: 380)
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {

@@ -23,10 +23,10 @@
 
 ## What it does
 
-- **Parses the official OpenAI export** — Uses the ZIP you get from ChatGPT (Settings → Data Controls → Export data). No scraping, no third-party APIs.
-- **Builds a Memory Core** — A single, structured context document (facts, preferences, skills, style) that you can paste into Claude (e.g. **Claude → Settings → Capabilities → “Import memory from other AI providers”**). Generate it with your Anthropic API key, or get a prompt file to run in Claude Cowork.
-- **Exports conversations by project** — Markdown per conversation, grouped by ChatGPT project, in a folder layout that’s easy to use in Claude.
-- **Guides you into Claude** — Prompts and instructions for Cowork or manual import so you know exactly what to paste and where.
+- **Parses ChatGPT exports** — Uses your official export ZIP (Settings → Data Controls → Export). No scraping or third-party APIs.
+- **Builds a Memory Core** — A structured context document to paste into Claude (Settings → Capabilities → Import memory). Generate via API key in-app, or get a Cowork prompt file.
+- **Exports by project** — Markdown per conversation, grouped by ChatGPT project, ready for Claude.
+- **Guides you in** — Step-by-step prompts for Cowork or manual import.
 
 ---
 
@@ -52,7 +52,7 @@
 
 ## Requirements
 
-- **macOS 13+** (Ventura or later)
+- **macOS 15+** (Sequoia or later)
 - **Anthropic API key** — Optional for Memory Core *generation*; if you skip it, you get the Cowork prompt file instead. Required for in-app synthesis (stored in Keychain).
 
 ---
@@ -76,6 +76,17 @@ Your chosen folder/
 
 ---
 
+## Installation
+
+Get `NeuralJack.dmg` from the [latest release](https://github.com/kidhack/neuraljack/releases/latest). Open the DMG and drag NeuralJack.app to Applications.
+
+## Version history
+
+- **[Download latest build](https://github.com/kidhack/neuraljack/releases/latest)** — Newest version with pre-built DMG
+- **[All releases](https://github.com/kidhack/neuraljack/releases)** — Full version history and older builds
+
+---
+
 ## Build from source
 
 ```bash
@@ -85,6 +96,30 @@ open NeuralJack.xcodeproj
 ```
 
 Build and run in Xcode (⌘R). No extra dependencies beyond the Swift packages in the project.
+
+---
+
+## Releasing
+
+To create a distributable DMG for a new version:
+
+```bash
+./scripts/package-release.sh 1.0
+```
+
+This builds the app (Release config) and creates `dist/NeuralJack-1.0.dmg`. For the classic drag-to-install layout (app icon, arrow, Applications folder), install [create-dmg](https://github.com/create-dmg/create-dmg) first:
+
+```bash
+brew install create-dmg
+```
+
+Then:
+
+1. Create a [GitHub Release](https://github.com/kidhack/neuraljack/releases/new) with tag `v1.0` (or matching version)
+2. Upload the DMG as a release asset
+3. Add release notes
+
+Requires full Xcode (not just Command Line Tools). For signed/notarized distribution, use Xcode’s Archive → Distribute App flow or add signing steps to the script.
 
 ---
 

@@ -1,0 +1,25 @@
+name: Build and test
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    name: NeuralJack
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build NeuralJack
+        run: |
+          xcodebuild build \
+            -project NeuralJack.xcodeproj \
+            -scheme NeuralJack \
+            -destination 'platform=macOS' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO

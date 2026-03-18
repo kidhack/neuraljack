@@ -37,7 +37,7 @@ struct WizardMemoryCoreStepView: View {
             WizardCard {
                 WizardCardRow {
                     Toggle("Use API key", isOn: $vm.useAPIKeyForMemoryCore)
-                        .font(.neuralJackTitle2Semibold)
+                        .font(.neuralJackCardHeaderSemibold)
                         .toggleStyle(.switch)
                 }
 
@@ -48,7 +48,7 @@ struct WizardMemoryCoreStepView: View {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundStyle(.green)
                                 Text(vm.maskedAPIKey() ?? "API key saved")
-                                    .font(.system(size: 18, design: .monospaced))
+                                    .font(.system(size: 16, design: .monospaced))
                                 Spacer()
                                 Button("Remove") {
                                     vm.removeAPIKey()
@@ -80,7 +80,7 @@ struct WizardMemoryCoreStepView: View {
                                                 .frame(width: 56)
                                         }
                                     }
-                                    .buttonStyle(.borderedProminent)
+                                    .buttonStyle(NeuralJackProminentButtonStyle())
                                     .focusable(false)
                                     .disabled(vm.apiKeyInput.isEmpty || vm.isValidatingKey)
                                     .keyboardShortcut(.return, modifiers: [])
@@ -108,7 +108,7 @@ struct WizardMemoryCoreStepView: View {
 
                                 Text("Your key is stored securely in the macOS Keychain.")
                                     .font(.neuralJackCaption)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyleNeuralJackSecondary()
 
                                 Link("Get a key at console.anthropic.com →",
                                      destination: URL(string: "https://console.anthropic.com")!)
@@ -120,7 +120,7 @@ struct WizardMemoryCoreStepView: View {
                     WizardCardRow(divider: false) {
                         Text("Claude memory core prompt will be generated in your output folder.")
                             .font(.neuralJackBody)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyleNeuralJackSecondary()
                     }
                 }
             }
@@ -146,14 +146,14 @@ struct WizardMemoryCoreStepView: View {
 
                         Text(progressLabel)
                             .font(.neuralJackCaption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyleNeuralJackSecondary()
                     }
                 }
             }
 
             Text("This may take a moment for large exports. Claude is reading your conversations.")
                 .font(.neuralJackCaption)
-                .foregroundStyle(.secondary)
+                .foregroundStyleNeuralJackSecondary()
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .multilineTextAlignment(.leading)
         }
@@ -171,11 +171,11 @@ struct WizardMemoryCoreStepView: View {
                             .font(.neuralJackBody)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Memory Core generated")
-                                .font(.system(size: 18, weight: .medium))
+                                .font(.system(size: 16, weight: .medium))
                             if let core = vm.memoryCore {
                                 Text("\(core.sourceConversationCount) conversations synthesized")
                                     .font(.neuralJackCaption)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyleNeuralJackSecondary()
                             }
                         }
                         Spacer()
@@ -194,7 +194,7 @@ struct WizardMemoryCoreStepView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("To give Claude your context: open the memory core file in your export folder and paste its contents into your Claude project's instructions (Project settings → Project instructions).")
                             .font(.neuralJackCaption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyleNeuralJackSecondary()
 
                         Button {
                             let url = vm.memoryCoreFileURL()
@@ -216,7 +216,7 @@ struct WizardMemoryCoreStepView: View {
                             HStack {
                                 Text("Preview")
                                     .font(.system(size: 13, weight: .semibold))
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyleNeuralJackSecondary()
                                 Spacer()
                                 Button(showFullPreview ? "Less" : "More") {
                                     showFullPreview.toggle()
@@ -229,7 +229,7 @@ struct WizardMemoryCoreStepView: View {
 
                             Text(core.markdown)
                                 .font(.system(.caption, design: .monospaced))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyleNeuralJackSecondary()
                                 .lineLimit(showFullPreview ? nil : 6)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -256,11 +256,11 @@ struct WizardMemoryCoreStepView: View {
                                 .foregroundStyle(.primary)
                         } else {
                             Image(systemName: "forward.circle")
-                                .foregroundStyle(.secondary)
+                                .foregroundStyleNeuralJackSecondary()
                                 .font(.neuralJackBody)
                             Text("Memory Core skipped")
                                 .font(.neuralJackBody)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyleNeuralJackSecondary()
                         }
                         Spacer()
                         Button(vm.coworkMemoryPromptFileWritten ? "Use API key instead" : "Generate anyway") {
@@ -286,14 +286,14 @@ struct WizardMemoryCoreStepView: View {
                             .foregroundStyle(.red)
                             .font(.neuralJackBody)
                         Text("Generation failed")
-                            .font(.system(size: 18, weight: .medium))
+                            .font(.system(size: 16, weight: .medium))
                     }
                 }
                 if let error = vm.memoryCoreError {
                     WizardCardRow(divider: false) {
                         Text(error)
                             .font(.neuralJackCaption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyleNeuralJackSecondary()
                     }
                 }
             }

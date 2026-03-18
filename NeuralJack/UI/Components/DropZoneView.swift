@@ -12,11 +12,10 @@ struct DropZoneView: View {
     var body: some View {
         RoundedRectangle(cornerRadius: 16)
             .strokeBorder(
-                isTargeted ? Color.accentColor : Color.secondary,
+                isTargeted ? Color.accentColor : Color.neuralJackSecondary,
                 style: StrokeStyle(lineWidth: 2, dash: [8, 6])
             )
             .animation(.easeInOut(duration: 0.15), value: isTargeted)
-            .background(RoundedRectangle(cornerRadius: 16).fill(.quaternary.opacity(0.3)))
             .overlay {
                 Button {
                     onChooseFile?()
@@ -24,9 +23,9 @@ struct DropZoneView: View {
                     VStack(spacing: 12) {
                         Image(systemName: "doc.zipper")
                             .font(.system(size: 66))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyleNeuralJackSecondary()
                         Text(isTargeted ? "Release to import" : "Drop your OpenAI data export here")
-                            .font(.neuralJackTitle2)
+                            .font(.neuralJackCardHeader)
                         Text("Choose folder or zip…")
                             .font(.neuralJackBody)
                             .foregroundStyle(Color.accentColor)

@@ -1,0 +1,17 @@
+# Build artifacts
+build/
+dist/
+DerivedData/
+
+# Xcode
+*.xcuserstate
+*.xcworkspacedata
+xcuserdata/
+
+# Design assets (large PSDs exceed GitHub limit)
+Icon production/
+
+# macOS
+.DS_Store
+*.swp
+*~

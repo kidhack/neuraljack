@@ -9,9 +9,9 @@ struct ImportProgressView: View {
     @Environment(ImportViewModel.self) private var importViewModel
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 5) {
             Text("Parsing export…")
-                .font(.neuralJackTitle2)
+                .font(.neuralJackCardHeader)
 
             ProgressView()
                 .progressViewStyle(.linear)
@@ -19,7 +19,7 @@ struct ImportProgressView: View {
 
             Text(importViewModel.parseProgressMessage.isEmpty ? "Preparing…" : importViewModel.parseProgressMessage)
                 .font(.neuralJackCaption)
-                .foregroundStyle(.secondary)
+                .foregroundStyleNeuralJackSecondary()
         }
         .padding(40)
     }

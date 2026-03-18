@@ -38,14 +38,14 @@ struct WizardConversationsStepView: View {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("\(vm.uncategorizedConversations.count) conversations")
-                                .font(.system(size: 18, weight: .medium))
+                                .font(.system(size: 16, weight: .medium))
                             Text("Exported as Markdown files to your output folder")
                                 .font(.neuralJackCaption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyleNeuralJackSecondary()
                         }
                         Spacer()
                         Image(systemName: "bubble.left.and.bubble.right")
-                            .foregroundStyle(.secondary)
+                            .foregroundStyleNeuralJackSecondary()
                     }
                 }
             }
@@ -83,11 +83,11 @@ struct WizardConversationsStepView: View {
                             .font(.neuralJackBody)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Conversations exported")
-                                .font(.system(size: 18, weight: .medium))
+                                .font(.system(size: 16, weight: .medium))
                             if let pkg = vm.conversationsPackage {
                                 Text("\(pkg.conversationCount) files written")
                                     .font(.neuralJackCaption)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyleNeuralJackSecondary()
                             }
                         }
                         Spacer()
@@ -120,12 +120,12 @@ struct WizardConversationsStepView: View {
                             .foregroundStyle(.red)
                             .font(.neuralJackBody)
                         Text("Export failed")
-                            .font(.system(size: 18, weight: .medium))
+                            .font(.system(size: 16, weight: .medium))
                     }
                 }
                 if let err = vm.conversationsError {
                     WizardCardRow(divider: false) {
-                        Text(err).font(.neuralJackCaption).foregroundStyle(.secondary)
+                        Text(err).font(.neuralJackCaption).foregroundStyleNeuralJackSecondary()
                     }
                 }
             }

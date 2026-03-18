@@ -9,8 +9,6 @@ import Foundation
 
 // MARK: - Top-level
 
-typealias OpenAIConversationsFile = [OpenAIConversation]
-
 struct OpenAIConversation: Codable, Identifiable {
     let id: String
     let title: String

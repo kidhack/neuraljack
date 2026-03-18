@@ -117,25 +117,6 @@ class ExportService {
 }
 ```
 
-### `GuidedImportService`
-```swift
-class GuidedImportService {
-    // Opens claude.ai/projects in the default browser
-    func openClaudeProjects()
-    
-    // Copies text to NSPasteboard
-    func copyToClipboard(_ string: String)
-    
-    // Reveals the project package folder in Finder (highlights it)
-    func revealInFinder(_ url: URL)
-    
-    // Persists HUD step progress across app restarts
-    func saveProgress(_ progress: GuidedImportProgress)
-    func loadProgress() -> GuidedImportProgress?
-    func clearProgress()
-}
-```
-
 ---
 
 ## Memory Core Synthesis Pipeline
@@ -161,7 +142,7 @@ Output: MemoryCore.markdown (ready to paste into Claude)
 ```
 
 ### Extraction Prompt (Phase 1)
-Located at `Resources/Prompts/extraction-prompt.md`
+Located at `Resources/Prompts/extraction-prompt.txt`
 
 ```
 You are analyzing a batch of ChatGPT conversations to extract memory-relevant information.
@@ -179,7 +160,7 @@ Output as JSON: { "facts": [], "skills": [], "preferences": [], "topics": [] }
 ```
 
 ### Synthesis Prompt (Phase 2)
-Located at `Resources/Prompts/synthesis-prompt.md`
+Located at `Resources/Prompts/synthesis-prompt.txt`
 
 ```
 You are creating a Memory Core — a concise context document for an AI assistant.
@@ -196,128 +177,35 @@ Format requirements:
 
 ---
 
-## Guided Import HUD
-
-The HUD is a floating `NSPanel` that lives outside the SwiftUI window hierarchy. It stays above the browser without stealing focus, so the user can interact with claude.ai freely.
-
-### NSPanel Configuration
-```swift
-// GuidedImportPanel.swift
-class GuidedImportPanel: NSPanel {
-    init() {
-        super.init(
-            contentRect: .zero,
-            styleMask: [.titled, .closable, .nonactivatingPanel, .hudWindow],
-            backing: .buffered,
-            defer: false
-        )
-        self.level = .floating            // Stays above browser
-        self.isFloatingPanel = true
-        self.hidesOnDeactivate = false    // Stays visible when user clicks browser
-        self.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        self.title = "NeuralJack Guide"
-    }
-}
-```
-
-### HUD SwiftUI Content
-The panel hosts a SwiftUI view via `NSHostingView`:
-```swift
-// GuidedImportHUDView.swift — hosted in the NSPanel
-@MainActor @Observable
-class GuidedImportHUDViewModel {
-    var projects: [ClaudeProjectPackage]
-    var currentProjectIndex: Int = 0
-    var currentStepIndex: Int = 0
-    
-    var currentProject: ClaudeProjectPackage { projects[currentProjectIndex] }
-    var currentStep: ImportStep { currentProject.steps[currentStepIndex] }
-    var isLastStep: Bool { currentStepIndex == currentProject.steps.count - 1 }
-    var isLastProject: Bool { currentProjectIndex == projects.count - 1 }
-    
-    func advanceStep() { ... }
-    func skipProject() { ... }
-    func skipAll() { ... }
-    
-    // Called on each step advance — triggers auto-actions
-    private func executeAutoAction(for step: ImportStep) {
-        switch step.autoAction {
-        case .copyToClipboard(let string): service.copyToClipboard(string)
-        case .revealInFinder(let url):     service.revealInFinder(url)
-        case .none:                        break
-        }
-    }
-}
-```
-
-### Step Auto-Actions
-Each `ImportStep` may carry an optional auto-action that fires when the user taps "Done" on the *previous* step — so the action is ready before they need it:
-
-```swift
-enum StepAutoAction {
-    case none
-    case copyToClipboard(String)    // Silently copies; HUD says "copied to clipboard"
-    case revealInFinder(URL)        // Opens Finder window showing the package folder
-}
-```
-
-### HUD Positioning
-```swift
-// Anchor to right edge of main screen, vertically centered
-func positionHUD(_ panel: NSPanel) {
-    guard let screen = NSScreen.main else { return }
-    let padding: CGFloat = 16
-    let hudWidth: CGFloat = 340
-    let hudHeight: CGFloat = panel.frame.height
-    let x = screen.visibleFrame.maxX - hudWidth - padding
-    let y = screen.visibleFrame.midY - hudHeight / 2
-    panel.setFrameOrigin(NSPoint(x: x, y: y))
-}
-```
-
----
-
-## Data Flow: ZIP Drop → Guided Claude Import
+## Data Flow: ZIP Drop → Wizard → Complete
 
 ```
 User drops ZIP
      │
      ▼
-AppDelegate.application(_:openFiles:)
-OR
-ImportDropDelegate.performDrop(info:)
+AppDelegate.application(_:openFiles:)  OR  MainWindowView.dropDestination
      │
      ▼
 ImportViewModel.handleDrop(url: URL)
      │
-     ├── ZIPParserService.parse(zipURL:)
-     │        └── returns OpenAIExport
+     └── ZIPParserService.parse(from:)
+              └── returns OpenAIExport
      │
      ▼
-MigrationViewModel.startMigration()
-     │
-     ├── AnthropicService.synthesizeMemoryCore(...)
-     │        ├── Phase 1: batchExtract() × N batches
-     │        ├── Phase 2: synthesize(extracts:)
-     │        └── Phase 3: format(raw:)
-     │        └── returns MemoryCore
-     │
-     ├── ExportService.packageProjects(...)
-     │        ├── Per project: write project-instructions.md
-     │        ├── Per project: write memory-core.md
-     │        ├── Per project: write conversations/*.md
-     │        └── returns [ClaudeProjectPackage]
-     │
-     └── ExportService.exportConversations(...)   ← flat backup archive
-     │
+MainWindowView.onChange(of: importViewModel.state.phase)
+     │  when .parsed → creates WizardViewModel(export: ...)
      ▼
-ResultsViewModel
-     │ (user clicks "Import into Claude →")
-     ▼
-GuidedImportViewModel.start(packages: [ClaudeProjectPackage])
-     ├── GuidedImportService.openClaudeProjects()  → NSWorkspace opens browser
-     ├── GuidedImportPanel.show()                  → floating HUD appears
-     └── Step-by-step: user advances, auto-actions fire per step
+WizardView (step-by-step)
+     │  Steps: setup → dataSummary → memoryCore → projects → conversations → complete
+     │
+     ├── WizardSetupStepView        — API key / Cowork choice, output folder
+     ├── WizardDataSummaryStepView  — Data overview, options (Memory Core, export log)
+     ├── WizardMemoryCoreStepView   — Generate Memory Core (API) or write Cowork prompt
+     ├── WizardProjectSelectionView — Select projects to export
+     ├── WizardConversationsStepView — Export projects + optional uncategorized
+     └── WizardCompleteStepView    — Summary, open export folder, links to prompts
+     │
+     └── WizardViewModel runs: AnthropicService.synthesizeMemoryCore, ExportService
 ```
 
 ---
@@ -355,57 +243,38 @@ func application(_ sender: NSApplication, openFile filename: String) -> Bool {
 ```
 NeuralJackApp (WindowGroup)
 └── MainWindowView
-    ├── [State: .empty]      → WelcomeDropZoneView
-    ├── [State: .importing]  → ImportProgressView
-    ├── [State: .reviewing]  → NavigationSplitView
-    │                            ├── Sidebar: ConversationListView
-    │                            └── Detail: ConversationDetailView
-    ├── [State: .migrating]  → MigrationProgressView
-    └── [State: .done]       → ResultsView
-                                 ├── MemoryCorePreviewView
-                                 ├── ProjectPackagesView
-                                 ├── ExportedFilesView
-                                 └── NextStepsView
-                                      └── [Import into Claude →] button
-                                           └── launches GuidedImportPanel
+    ├── [State: .idle / .failed]  → WelcomeView (DropZoneView)
+    ├── [State: .parsing]         → ImportProgressView
+    └── [State: .parsed]          → WizardView
+                                      ├── WizardSetupStepView
+                                      ├── WizardDataSummaryStepView
+                                      ├── WizardMemoryCoreStepView
+                                      ├── WizardProjectSelectionView
+                                      ├── WizardConversationsStepView
+                                      └── WizardCompleteStepView
 
-GuidedImportPanel (NSPanel — floating, non-activating)
-└── GuidedImportHUDView (NSHostingView)
-    ├── ProjectSwitcherView   (e.g. "Project 2 of 3 ✓✓○")
-    ├── CurrentStepView       (instruction text + auto-action label)
-    ├── StepActionsView       ([Done →]  [Skip Project]  [Skip All])
-    └── DisclaimerFooterView  ("NeuralJack cannot automate claude.ai…")
-
-PreferencesWindow (Settings scene)
+Settings (SwiftUI Settings scene)
 └── PreferencesView
-    ├── APIKeyView
-    └── AboutView
+    └── API key entry, validation, Keychain
 ```
 
 ---
 
 ## Error Handling Strategy
 
-All errors are typed as `AppError`. Services throw `AppError`. ViewModels catch and translate:
+All errors are typed as `AppError`. Services throw `AppError`. ViewModels catch and translate to user-facing messages. Example (WizardViewModel):
 
 ```swift
-@MainActor @Observable
-class MigrationViewModel {
-    var errorMessage: String? = nil
-    
-    func startMigration() async {
-        do {
-            try await service.doWork()
-        } catch let error as AppError {
-            self.errorMessage = error.errorDescription
-        } catch {
-            self.errorMessage = "An unexpected error occurred. Please try again."
-        }
-    }
+do {
+    try await anthropicService.synthesizeMemoryCore(...)
+} catch let error as AppError {
+    memoryCoreError = error.errorDescription
+} catch {
+    memoryCoreError = "Memory Core generation failed: \(error.localizedDescription)"
 }
 ```
 
-Errors surface as a `.safeAreaInset(edge: .top)` red banner, auto-clearing after 8 seconds.
+Errors surface as a `.safeAreaInset(edge: .top)` error banner in MainWindowView (import errors) or inline in wizard steps.
 
 ---
 

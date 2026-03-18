@@ -654,43 +654,6 @@ final class WizardViewModel {
         }
     }
 
-    // MARK: - Cowork Prompt (legacy, used by WizardProjectStepView)
-
-    func coworkPrompt(for group: ProjectGroup) -> String {
-        let projectDir: URL
-        if let pkg = migratedPackages[group.id] {
-            projectDir = pkg.packageDirectory
-        } else {
-            let folderName = group.id == "general" ? "Uncategorized" : group.name
-                .replacingOccurrences(of: "/", with: "-")
-                .replacingOccurrences(of: "\\", with: "-")
-            projectDir = outputDirectory
-                .appendingPathComponent(exportFolderName)
-                .appendingPathComponent("projects")
-                .appendingPathComponent(folderName)
-        }
-
-        let hasInstructions = memoryCore != nil
-
-        return """
-        I need your help creating a new project in Claude.ai. Please open a browser and complete these steps:
-
-        **Project Name:** \(group.name)
-        **Conversations:** \(group.conversations.count) files to upload
-        **Files location:** \(projectDir.path)
-
-        **Steps:**
-        1. Navigate to https://claude.ai/projects
-        2. Click "New Project" in the left sidebar
-        3. Set the project name to exactly: **\(group.name)**
-        4. Click "Create project"
-        5. In the knowledge panel, click "Add content"
-        6. Upload all `.md` files from: `\(projectDir.appendingPathComponent("conversations").path)`\(hasInstructions ? "\n        7. Click the pencil icon next to \"Project Instructions\"\n        8. Copy the contents of `_project-instructions.md` from the project folder and paste them in\n        9. Click Save" : "")
-
-        Once complete, confirm the project "\(group.name)" is visible in Claude.ai.
-        """
-    }
-
     // MARK: - Export Log
 
     func exportLog() {

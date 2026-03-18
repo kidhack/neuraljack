@@ -103,16 +103,4 @@ final class ImportViewModel {
             }
         }
     }
-
-    /// Builds migration settings from current state.
-    func makeMigrationSettings() -> MigrationSettings? {
-        guard case .parsed = state else { return nil }
-        return MigrationSettings(
-            selectedConversations: selectedConversations,
-            includeMemoryCore: includeMemoryCore,
-            includeExport: includeExport,
-            includeProjects: includeProjects,
-            outputDirectory: outputDirectory
-        )
-    }
 }

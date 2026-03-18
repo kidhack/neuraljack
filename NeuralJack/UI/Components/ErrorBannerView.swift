@@ -3,6 +3,7 @@
 //  NeuralJack
 //
 
+import AppKit
 import SwiftUI
 
 struct ErrorBannerView: View {
@@ -24,7 +25,7 @@ struct ErrorBannerView: View {
             .buttonStyle(.plain)
         }
         .padding()
-        .background(Color.red.opacity(0.2))
+        .background(Color(nsColor: .systemRed).opacity(0.15))
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Error: \(message)")

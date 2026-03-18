@@ -10,6 +10,7 @@ struct MainWindowView: View {
     @Environment(ImportViewModel.self) private var importViewModel
     @Environment(\.anthropicService) private var anthropicService
     @Environment(\.exportService) private var exportService
+    @Environment(\.colorScheme) private var colorScheme
     @State private var isDropTargeted = false
     @State private var wizardViewModel: WizardViewModel?
     @State private var hasAPIKey = false
@@ -20,11 +21,13 @@ struct MainWindowView: View {
             case .idle, .failed:
                 WelcomeView(isTargeted: $isDropTargeted)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(isDropTargeted ? Color.accentColor.opacity(0.08) : Color.clear)
+                    .background(isDropTargeted ? Color.accentColor.opacity(0.08) : (colorScheme == .dark ? Color.neuralJackWindowBackgroundDark : Color.clear))
                     .animation(.easeInOut(duration: 0.15), value: isDropTargeted)
 
             case .parsing:
                 ImportProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(colorScheme == .dark ? Color.neuralJackWindowBackgroundDark : Color(NSColor.windowBackgroundColor))
 
             case .parsed:
                 if let vm = wizardViewModel {
@@ -33,10 +36,11 @@ struct MainWindowView: View {
                     // Briefly shown while onChange fires — show a spinner
                     ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(colorScheme == .dark ? Color.neuralJackWindowBackgroundDark : Color(NSColor.windowBackgroundColor))
                 }
             }
         }
-        .frame(minWidth: 720, minHeight: 720)
+        .frame(minWidth: 720, maxWidth: 720, minHeight: 720, maxHeight: 1000)
         .dropDestination(for: URL.self) { urls, _ in
             guard let url = urls.first else { return false }
             Task { @MainActor in
@@ -55,6 +59,20 @@ struct MainWindowView: View {
                     SettingsLink(label: { Text("API Key") })
                 }
             }
+        }
+        .toolbarBackground(colorScheme == .dark ? Color.neuralJackWindowBackgroundDark : Color(NSColor.windowBackgroundColor), for: .automatic)
+        .safeAreaInset(edge: .top) {
+            // 0→100% opacity gradient of background so scrolling content blends softly
+            LinearGradient(
+                colors: [
+                    colorScheme == .dark ? Color.neuralJackWindowBackgroundDark : Color(NSColor.windowBackgroundColor),
+                    (colorScheme == .dark ? Color.neuralJackWindowBackgroundDark : Color(NSColor.windowBackgroundColor)).opacity(0)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: 12)
+            .allowsHitTesting(false)
         }
         .safeAreaInset(edge: .top) {
             if let error = importError {

@@ -27,7 +27,7 @@ struct WizardSetupStepView: View {
         WizardCard {
             WizardCardRow {
                 Text("Anthropic API Key")
-                    .font(.neuralJackTitle2Semibold)
+                    .font(.neuralJackCardHeaderSemibold)
             }
 
             if vm.hasAPIKey {
@@ -36,7 +36,7 @@ struct WizardSetupStepView: View {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundStyle(.green)
                         Text(vm.maskedAPIKey() ?? "API key saved")
-                            .font(.system(size: 18, design: .monospaced))
+                            .font(.system(size: 16, design: .monospaced))
                         Spacer()
                         Button("Remove") {
                             vm.removeAPIKey()
@@ -52,7 +52,7 @@ struct WizardSetupStepView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Paste your API key to enable Memory Core generation and richer project instructions.")
                             .font(.neuralJackBody)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyleNeuralJackSecondary()
 
                         HStack(alignment: .center, spacing: 8) {
                             SecureField("sk-ant-...", text: $vm.apiKeyInput)
@@ -72,7 +72,7 @@ struct WizardSetupStepView: View {
                                         .frame(width: 56)
                                 }
                             }
-                            .buttonStyle(.borderedProminent)
+                            .buttonStyle(NeuralJackProminentButtonStyle())
                             .focusable(false)
                             .disabled(vm.apiKeyInput.isEmpty || vm.isValidatingKey)
                             .keyboardShortcut(.return, modifiers: [])

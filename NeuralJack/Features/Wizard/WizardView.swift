@@ -3,14 +3,16 @@
 //  NeuralJack
 //
 
+import AppKit
 import SwiftUI
 
 struct WizardView: View {
     @Bindable var vm: WizardViewModel
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         VStack(spacing: 0) {
-            ScrollView {
+            ScrollView(.vertical) {
                 Group {
                     switch vm.currentStep {
                     case .setup:
@@ -31,6 +33,9 @@ struct WizardView: View {
                 .frame(maxWidth: 600)
                 .frame(maxWidth: .infinity)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .overlayScrollerStyle()
+            .background(colorScheme == .dark ? Color.neuralJackWindowBackgroundDark : Color(NSColor.windowBackgroundColor))
 
             WizardNavBar(vm: vm)
         }
@@ -44,10 +49,11 @@ struct WizardView: View {
 
 struct WizardNavBar: View {
     @Bindable var vm: WizardViewModel
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         VStack(spacing: 0) {
-            Divider()
+            NeuralJackDivider()
             HStack {
                 if vm.canGoBack {
                     Button {
@@ -74,7 +80,7 @@ struct WizardNavBar: View {
                         }
                     }
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(NeuralJackProminentButtonStyle())
                 .controlSize(.large)
                 .keyboardShortcut(.return, modifiers: [])
                 .focusable(false)
@@ -84,6 +90,7 @@ struct WizardNavBar: View {
             .padding(.horizontal, 24)
             .padding(.vertical, 14)
         }
+        .background(colorScheme == .dark ? Color.neuralJackWindowBackgroundDark : Color(NSColor.windowBackgroundColor))
     }
 }
 
@@ -102,16 +109,17 @@ struct WizardStepShell<Content: View>: View {
                 HStack(spacing: 10) {
                     Image(systemName: icon)
                         .font(.neuralJackTitle2)
-                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(LinearGradient.neuralJackAccent)
+                        .frame(width: 28, height: 28, alignment: .center)
                     Text(title)
                         .font(.neuralJackTitle2Semibold)
                 }
                 Text(subtitle)
                     .font(.neuralJackBody)
                     .lineSpacing(4)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyleNeuralJackSecondary()
             }
-            .padding(.bottom, 72)
+            .padding(.bottom, 14)
 
             content()
         }
@@ -121,6 +129,7 @@ struct WizardStepShell<Content: View>: View {
 // MARK: - Section Card
 
 struct WizardCard<Content: View>: View {
+    @Environment(\.colorScheme) private var colorScheme
     @ViewBuilder let content: () -> Content
 
     var body: some View {
@@ -128,7 +137,13 @@ struct WizardCard<Content: View>: View {
             content()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 10).fill(.quaternary))
+        .background {
+            if colorScheme == .light {
+                RoundedRectangle(cornerRadius: 10).fill(Color.neuralJackCardBackgroundLight)
+            } else {
+                RoundedRectangle(cornerRadius: 10).fill(Color.neuralJackCardBackgroundDark)
+            }
+        }
     }
 }
 
@@ -147,7 +162,10 @@ struct WizardCardRow<Content: View>: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            if divider { Divider() }
+            if divider {
+                NeuralJackDivider()
+                    .padding(.horizontal, 16)
+            }
         }
     }
 }

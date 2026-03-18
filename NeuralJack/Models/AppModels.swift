@@ -107,46 +107,6 @@ struct ClaudeProjectPackage: Identifiable {
     let conversationCount: Int
 }
 
-// MARK: - Migration
-
-struct MigrationSettings {
-    let selectedConversations: Set<String>
-    let includeMemoryCore: Bool
-    let includeExport: Bool
-    let includeProjects: Bool
-    let outputDirectory: URL
-}
-
-enum StepState {
-    case pending
-    case inProgress(Double)
-    case done
-    case failed
-}
-
-// MARK: - Guided Import HUD
-
-struct ImportStep: Identifiable {
-    let id: Int
-    let instruction: String
-    let autoAction: StepAutoAction
-    let actionStatusLabel: String?
-}
-
-enum StepAutoAction: Codable {
-    case none
-    case copyToClipboard(String)
-    case revealInFinder(URL)
-}
-
-struct GuidedImportProgress: Codable {
-    let packageIDs: [String]
-    var completedPackageIDs: Set<String>
-    var currentPackageID: String
-    var currentStepIndex: Int
-    var outputDirectory: URL
-}
-
 // MARK: - ExportResult
 
 struct ExportResult {
