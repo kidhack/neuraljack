@@ -14,7 +14,7 @@
                     ███████║██║  ██║╚██████╗██║  ██╗
                     ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
 
-ChatGPT → Claude migration assistant for Mac
+  ChatGPT → Claude migration assistant for Mac
 ```
 
 **NeuralJack** turns your ChatGPT export into everything you need to move to Claude. Drop your OpenAI data ZIP into the app, pick your options, and get a **Memory Core**, organized conversation exports, and step-by-step import prompts—so you don’t leave your history or context behind.
